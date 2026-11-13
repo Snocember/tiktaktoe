@@ -103,3 +103,15 @@ h1 {
   background-color: var(--win-color);
   color: var(--bg-color);
 }
+
+.board[data-turn="X"] .cell:not([data-player]):hover::after {
+  content: "X";
+  color: var(--accent-x);
+  opacity: 0.3; /* Halbtransparent */
+}
+
+.board[data-turn="O"] .cell:not([data-player]):hover::after {
+  content: "O";
+  color: var(--accent-o);
+  opacity: 0.3;
+}

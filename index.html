@@ -12,7 +12,7 @@
 
     <p id="status" class="status">Spieler X ist am Zug</p>
 
-    <div id="board" class="board" role="grid" aria-label="Tic-Tac-Toe Spielfeld">
+    <div id="board" class="board" data-turn="X" role="grid" aria-label="Tic-Tac-Toe Spielfeld">
       <button class="cell" data-index="0" aria-label="Feld 1"></button>
       <button class="cell" data-index="1" aria-label="Feld 2"></button>
       <button class="cell" data-index="2" aria-label="Feld 3"></button>
@@ -26,6 +26,7 @@
 
     <button id="reset-btn" class="reset-btn">Neues Spiel</button>
   </main>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
   <script src="app.js"></script>
 </body>

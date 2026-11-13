@@ -2,6 +2,7 @@
 const cells = document.querySelectorAll('.cell');
 const statusText = document.getElementById('status');
 const resetBtn = document.getElementById('reset-btn');
+const board = document.getElementById('board');
 
 // Alle 8 Gewinnlinien (3 Reihen, 3 Spalten, 2 Diagonalen)
 const WINNING_COMBINATIONS = [
@@ -41,6 +42,15 @@ function handleCellClick(event) {
     gameActive = false;
     statusText.textContent = `Spieler ${currentPlayer} hat gewonnen!`;
     highlightWinningCells(winningLine);
+    
+    board.removeAttribute('data-turn'); // <--- NEU: Hover-Vorschau aus
+    
+    // <--- NEU: Konfetti-Regen starten
+    confetti({
+      particleCount: 150,
+      spread: 80,
+      origin: { y: 0.6 }
+    });
     return;
   }
 
@@ -48,12 +58,14 @@ function handleCellClick(event) {
   if (!boardState.includes('')) {
     gameActive = false;
     statusText.textContent = 'Unentschieden!';
+    board.removeAttribute('data-turn'); // <--- NEU: Hover-Vorschau aus
     return;
   }
 
   // Spieler wechseln
   currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
   statusText.textContent = `Spieler ${currentPlayer} ist am Zug`;
+  board.dataset.turn = currentPlayer; // <--- NEU: Hover-Vorschau aktualisieren
 }
 
 // Prüft alle 8 Linien und gibt bei einem Treffer die 3 Gewinn-Indizes zurück
@@ -84,6 +96,7 @@ function resetGame() {
   currentPlayer = 'X';
   gameActive = true;
   statusText.textContent = 'Spieler X ist am Zug';
+  board.dataset.turn = 'X';
 
   cells.forEach((cell) => {
     cell.textContent = '';
