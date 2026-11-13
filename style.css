@@ -45,6 +45,7 @@ h1 {
 .board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr); 
   gap: 10px;
   width: min(90vw, 340px);
   height: min(90vw, 340px);
@@ -52,6 +53,10 @@ h1 {
 }
 
 .cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1;
   background-color: var(--surface-color);
   border: none;
   border-radius: 12px;
@@ -92,4 +97,9 @@ h1 {
 
 .reset-btn:hover {
   opacity: 0.9;
+}
+
+.cell.win {
+  background-color: var(--win-color);
+  color: var(--bg-color);
 }
