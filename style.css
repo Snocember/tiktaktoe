@@ -99,6 +99,13 @@ h1 {
   opacity: 0.9;
 }
 
+.language-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1;
+}
+
 .cell.win {
   background-color: var(--win-color);
   color: var(--bg-color);

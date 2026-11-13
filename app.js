@@ -1,51 +1,76 @@
-// DOM-Elemente referenzieren
+// Get DOM elements
 const cells = document.querySelectorAll('.cell');
 const statusText = document.getElementById('status');
 const resetBtn = document.getElementById('reset-btn');
+const languageToggle = document.getElementById('language-toggle');
 const board = document.getElementById('board');
 
-// Alle 8 Gewinnlinien (3 Reihen, 3 Spalten, 2 Diagonalen)
+const translations = {
+  de: {
+    turn: (player) => `Spieler ${player} ist am Zug`,
+    win: (player) => `Spieler ${player} hat gewonnen!`,
+    draw: 'Unentschieden!',
+    newGame: 'Neues Spiel',
+    board: 'Tic-Tac-Toe Spielfeld',
+    cell: (number) => `Feld ${number}`,
+    switchLanguage: 'English',
+    switchLanguageLabel: 'Switch language to English',
+  },
+  en: {
+    turn: (player) => `Player ${player}'s turn`,
+    win: (player) => `Player ${player} wins!`,
+    draw: "It's a draw!",
+    newGame: 'New Game',
+    board: 'Tic-Tac-Toe board',
+    cell: (number) => `Cell ${number}`,
+    switchLanguage: 'Deutsch',
+    switchLanguageLabel: 'Sprache auf Deutsch umstellen',
+  },
+};
+
+
 const WINNING_COMBINATIONS = [
-  [0, 1, 2], // Oben waagerecht
-  [3, 4, 5], // Mitte waagerecht
-  [6, 7, 8], // Unten waagerecht
-  [0, 3, 6], // Links senkrecht
-  [1, 4, 7], // Mitte senkrecht
-  [2, 5, 8], // Rechts senkrecht
-  [0, 4, 8], // Diagonale links oben nach rechts unten
-  [2, 4, 6], // Diagonale rechts oben nach links unten
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
 ];
 
-// Spielzustand (State)
+// Game state
 let boardState = Array(9).fill('');
 let currentPlayer = 'X';
 let gameActive = true;
+let currentLanguage = 'de';
 
-// Klick auf ein Feld verarbeiten
+// Handle a cell click
 function handleCellClick(event) {
   const cell = event.target;
   const index = Number(cell.dataset.index);
 
-  // Abbrechen, wenn Feld belegt oder Spiel bereits beendet ist
+  // Ignore clicks on occupied cells or after the game has ended
   if (boardState[index] !== '' || !gameActive) {
     return;
   }
 
-  // Zug speichern und im UI anzeigen
+  // Save the move and update the UI
   boardState[index] = currentPlayer;
   cell.textContent = currentPlayer;
   cell.dataset.player = currentPlayer;
 
-  // Prüfen, ob der aktuelle Zug zum Sieg führt
+  // Check whether the current move wins the game
   const winningLine = getWinningLine();
   if (winningLine) {
     gameActive = false;
-    statusText.textContent = `Spieler ${currentPlayer} hat gewonnen!`;
+    updateStatus();
     highlightWinningCells(winningLine);
     
-    board.removeAttribute('data-turn'); // <--- NEU: Hover-Vorschau aus
+    board.removeAttribute('data-turn');
     
-    // <--- NEU: Konfetti-Regen starten
+    // Celebrate the win
     confetti({
       particleCount: 150,
       spread: 80,
@@ -54,21 +79,52 @@ function handleCellClick(event) {
     return;
   }
 
-  // Prüfen, ob alle 9 Felder voll sind (Unentschieden)
+  // Check whether all 9 cells are filled (a draw)
   if (!boardState.includes('')) {
     gameActive = false;
-    statusText.textContent = 'Unentschieden!';
-    board.removeAttribute('data-turn'); // <--- NEU: Hover-Vorschau aus
+    updateStatus();
+    board.removeAttribute('data-turn');
     return;
   }
 
-  // Spieler wechseln
+  // Switch players
   currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-  statusText.textContent = `Spieler ${currentPlayer} ist am Zug`;
-  board.dataset.turn = currentPlayer; // <--- NEU: Hover-Vorschau aktualisieren
+  updateStatus();
+  board.dataset.turn = currentPlayer;
 }
 
-// Prüft alle 8 Linien und gibt bei einem Treffer die 3 Gewinn-Indizes zurück
+function updateStatus() {
+  const text = translations[currentLanguage];
+  const winningLine = getWinningLine();
+
+  if (winningLine) {
+    statusText.textContent = text.win(boardState[winningLine[0]]);
+  } else if (!boardState.includes('')) {
+    statusText.textContent = text.draw;
+  } else {
+    statusText.textContent = text.turn(currentPlayer);
+  }
+}
+
+function updateLanguage() {
+  const text = translations[currentLanguage];
+  document.documentElement.lang = currentLanguage;
+  resetBtn.textContent = text.newGame;
+  board.setAttribute('aria-label', text.board);
+  cells.forEach((cell, index) => {
+    cell.setAttribute('aria-label', text.cell(index + 1));
+  });
+  languageToggle.textContent = text.switchLanguage;
+  languageToggle.setAttribute('aria-label', text.switchLanguageLabel);
+  updateStatus();
+}
+
+function toggleLanguage() {
+  currentLanguage = currentLanguage === 'de' ? 'en' : 'de';
+  updateLanguage();
+}
+
+// Check all 8 lines and return the 3 winning cell indices, if any
 function getWinningLine() {
   for (const combination of WINNING_COMBINATIONS) {
     const [a, b, c] = combination;
@@ -83,19 +139,18 @@ function getWinningLine() {
   return null;
 }
 
-// Gewinnlinie optisch hervorheben
+// Highlight the winning line
 function highlightWinningCells(indices) {
   indices.forEach((index) => {
     cells[index].classList.add('win');
   });
 }
 
-// Spiel komplett zurücksetzen (Issue #8)
+// Reset the game (Issue #8)
 function resetGame() {
   boardState = Array(9).fill('');
   currentPlayer = 'X';
   gameActive = true;
-  statusText.textContent = 'Spieler X ist am Zug';
   board.dataset.turn = 'X';
 
   cells.forEach((cell) => {
@@ -105,6 +160,8 @@ function resetGame() {
   });
 }
 
-// Event-Listener registrieren
+// Register event listeners
 cells.forEach((cell) => cell.addEventListener('click', handleCellClick));
 resetBtn.addEventListener('click', resetGame);
+languageToggle.addEventListener('click', toggleLanguage);
+updateLanguage();
