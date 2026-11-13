@@ -1,0 +1,95 @@
+:root {
+  --bg-color: #0f172a;
+  --surface-color: #1e293b;
+  --hover-color: #334155;
+  --text-color: #f8fafc;
+  --accent-x: #38bdf8;
+  --accent-o: #fb7185;
+  --win-color: #22c55e;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.status {
+  font-size: 1.15rem;
+  margin-bottom: 1.5rem;
+  min-height: 1.5em;
+  color: #cbd5e1;
+}
+
+/* 3x3 Raster */
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: min(90vw, 340px);
+  height: min(90vw, 340px);
+  margin: 0 auto 1.5rem;
+}
+
+.cell {
+  background-color: var(--surface-color);
+  border: none;
+  border-radius: 12px;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.cell:hover:not(:disabled) {
+  background-color: var(--hover-color);
+}
+
+.cell:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.cell[data-player="X"] {
+  color: var(--accent-x);
+}
+
+.cell[data-player="O"] {
+  color: var(--accent-o);
+}
+
+.reset-btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--bg-color);
+  background-color: var(--text-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.reset-btn:hover {
+  opacity: 0.9;
+}
