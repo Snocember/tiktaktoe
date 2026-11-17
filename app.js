@@ -5,6 +5,7 @@ const resetBtn = document.getElementById('reset-btn');
 const languageToggle = document.getElementById('language-toggle');
 const board = document.getElementById('board');
 const modeSelect = document.getElementById('mode-select');
+const modeLabel = document.querySelector('label[for="mode-select"]');
 
 const translations = {
   de: {
@@ -17,6 +18,10 @@ const translations = {
     switchLanguage: 'English',
     switchLanguageLabel: 'Switch language to English',
     aiThinking: 'KI überlegt...',
+    mode: 'Modus:',
+    minimaxMode: '1 Spieler vs KI (Schwer)',
+    easyMode: '1 Spieler vs KI (Einfach)',
+    localMode: '2 Spieler (Lokal)',
   },
   en: {
     turn: (player) => `Player ${player}'s turn`,
@@ -28,6 +33,10 @@ const translations = {
     switchLanguage: 'Deutsch',
     switchLanguageLabel: 'Sprache auf Deutsch umstellen',
     aiThinking: 'AI is thinking...',
+    mode: 'Mode:',
+    minimaxMode: '1 Player vs AI (Hard)',
+    easyMode: '1 Player vs AI (Easy)',
+    localMode: '2 Players (Local)',
   },
 };
 
@@ -42,6 +51,8 @@ let currentPlayer = 'X';
 let gameActive = true;
 let currentLanguage = 'de';
 let isSinglePlayer = true;
+let isMinimaxMode = true;
+let aiTimeout;
 
 const scores = { O: 10, X: -10, tie: 0 };
 
@@ -58,7 +69,10 @@ function checkWinner(boardArray) {
 
 function minimax(boardArray, depth, isMaximizing) {
   let result = checkWinner(boardArray);
-  if (result !== null) return scores[result];
+  if (result !== null) {
+    if (result === 'tie') return scores.tie;
+    return result === 'O' ? scores.O - depth : scores.X + depth;
+  }
 
   if (isMaximizing) {
     let bestScore = -Infinity;
@@ -100,6 +114,13 @@ function getBestMove() {
     }
   }
   return move;
+}
+
+function getRandomMove() {
+  const availableMoves = boardState
+    .map((value, index) => (value === '' ? index : null))
+    .filter((index) => index !== null);
+  return availableMoves[Math.floor(Math.random() * availableMoves.length)];
 }
 
 
@@ -148,8 +169,9 @@ function handleCellClick(event) {
     statusText.textContent = text.aiThinking;
     board.removeAttribute('data-turn');
     
-    setTimeout(() => {
-      const aiMove = getBestMove();
+    aiTimeout = setTimeout(() => {
+      if (!gameActive || currentPlayer !== 'O' || !isSinglePlayer) return;
+      const aiMove = isMinimaxMode ? getBestMove() : getRandomMove();
       executeMove(aiMove);
     }, 400);
   }
@@ -178,7 +200,13 @@ function updateLanguage() {
   });
   languageToggle.textContent = text.switchLanguage;
   languageToggle.setAttribute('aria-label', text.switchLanguageLabel);
-  
+
+  if (modeLabel && modeSelect) {
+    modeLabel.textContent = text.mode;
+    modeSelect.querySelector('[value="single-minimax"]').textContent = text.minimaxMode;
+    modeSelect.querySelector('[value="single-easy"]').textContent = text.easyMode;
+    modeSelect.querySelector('[value="multi"]').textContent = text.localMode;
+  }
 
   if (gameActive && isSinglePlayer && currentPlayer === 'O') {
     statusText.textContent = text.aiThinking;
@@ -215,6 +243,7 @@ function highlightWinningCells(indices) {
 }
 
 function resetGame() {
+  clearTimeout(aiTimeout);
   boardState = Array(9).fill('');
   currentPlayer = 'X';
   gameActive = true;
@@ -232,7 +261,8 @@ function resetGame() {
 
 if (modeSelect) {
   modeSelect.addEventListener('change', (e) => {
-    isSinglePlayer = e.target.value === 'single';
+    isSinglePlayer = e.target.value !== 'multi';
+    isMinimaxMode = e.target.value === 'single-minimax';
     resetGame();
   });
 }
